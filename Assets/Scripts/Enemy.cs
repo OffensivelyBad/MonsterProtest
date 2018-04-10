@@ -23,7 +23,7 @@ public class Enemy : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-        textLabel = GetComponent<Text>();
+        textLabel = FindObjectOfType<Text>();
         GameManager.Instance.RegisterEnemy(this);
         textLabel.text = enemyText;
 	}
@@ -36,6 +36,7 @@ public class Enemy : MonoBehaviour {
             char[] remainingCharacters = remainingText.ToCharArray();
             if (remainingCharacters.Length > 0 && character == remainingCharacters[0]) {
                 remainingText = remainingText.Substring(1, remainingText.Length - 1);
+                textLabel.text = remainingText;
             }
         }
     }

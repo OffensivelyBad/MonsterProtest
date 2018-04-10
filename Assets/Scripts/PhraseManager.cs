@@ -18,6 +18,9 @@ public class PhraseManager : Singleton<PhraseManager>
         phrases.Add("this is a phrase");
         phrases.Add("another phrase");
         phrases.Add("and one more");
+        phrases.Add("i like to kill deer");
+        phrases.Add("Mister T is a badass");
+        phrases.Add("he had a no hitter and I was completely oblivious to it");
     }
 
 }
