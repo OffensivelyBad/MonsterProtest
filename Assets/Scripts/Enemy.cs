@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections;
+using UnityEngine;
 using UnityEngine.AI;
 
 public class Enemy : MonoBehaviour {
@@ -25,7 +26,7 @@ public class Enemy : MonoBehaviour {
     }
 
 	// Use this for initialization
-	void Start () {
+	private void Start () {
         signText = FindObjectOfType<TextMesh>();
         agent = GetComponent<NavMeshAgent>();
         GameManager.Instance.RegisterEnemy(this);
@@ -35,7 +36,14 @@ public class Enemy : MonoBehaviour {
         MoveToDestination(destinationPosition);
 	}
 
-    private void MoveToDestination(Vector3 destination) {
+	private void Update()
+	{
+        if (agent.remainingDistance <= agent.stoppingDistance && !(transform.rotation.y >= 0.998f && transform.rotation.y <= 1f)) {
+            transform.Rotate(Vector3.up, 100 * Time.deltaTime);
+        }
+	}
+
+	private void MoveToDestination(Vector3 destination) {
         agent.destination = destination;
         agent.isStopped = false;
     }
