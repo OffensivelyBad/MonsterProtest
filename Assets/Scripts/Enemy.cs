@@ -1,12 +1,15 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.UI;
+﻿using UnityEngine;
+using UnityEngine.AI;
 
 public class Enemy : MonoBehaviour {
 
+    // Serialized fields
+    [SerializeField] private Vector3 startPosition = Vector3.zero;
+    [SerializeField] private Vector3 destinationPosition = Vector3.zero;
+
     // Private
-    private Text textLabel;
+    private TextMesh signText;
+    private NavMeshAgent agent;
     private string enemyText = "";
     private string remainingText = "";
 
@@ -23,10 +26,19 @@ public class Enemy : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-        textLabel = FindObjectOfType<Text>();
+        signText = FindObjectOfType<TextMesh>();
+        agent = GetComponent<NavMeshAgent>();
         GameManager.Instance.RegisterEnemy(this);
-        textLabel.text = enemyText;
+        signText.text = enemyText;
+        transform.localPosition = startPosition;
+        agent.isStopped = true;
+        MoveToDestination(destinationPosition);
 	}
+
+    private void MoveToDestination(Vector3 destination) {
+        agent.destination = destination;
+        agent.isStopped = false;
+    }
 
     public void ProcessAttackText(string text) {
         foreach (char character in text.ToCharArray()) {
@@ -36,7 +48,7 @@ public class Enemy : MonoBehaviour {
             char[] remainingCharacters = remainingText.ToCharArray();
             if (remainingCharacters.Length > 0 && character == remainingCharacters[0]) {
                 remainingText = remainingText.Substring(1, remainingText.Length - 1);
-                textLabel.text = remainingText;
+                signText.text = remainingText;
             }
         }
     }

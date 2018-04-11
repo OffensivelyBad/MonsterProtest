@@ -13,7 +13,6 @@ public class GameManager : Singleton<GameManager> {
     [SerializeField] private Player player = null;
     [SerializeField] private int totalEnemies = 5;
     [SerializeField] private Enemy[] enemies = null;
-    [SerializeField] private Vector3 frontPosition = Vector3.zero;
 
     // Private
     private GameState state = GameState.playing;
@@ -42,7 +41,6 @@ public class GameManager : Singleton<GameManager> {
         }
         string phrase = PhraseManager.Instance.GetRandomPhrase();
         Enemy newEnemy = Instantiate(GetRandomEnemy());
-        newEnemy.transform.position = frontPosition;
         newEnemy.EnemyText = phrase;
         SetFocusedEnemy(newEnemy);
     }
