@@ -5,7 +5,6 @@ using UnityEngine.AI;
 public class Enemy : MonoBehaviour {
 
     // Serialized fields
-    [SerializeField] private Vector3 startPosition = Vector3.zero;
     [SerializeField] private Vector3 destinationPosition = Vector3.zero;
 
     // Private
@@ -13,12 +12,11 @@ public class Enemy : MonoBehaviour {
     private NavMeshAgent agent;
     private string enemyText = "";
     private string remainingText = "";
+    private bool canAttack = false;
 
     // Public
     public string EnemyText {
-        get {
-            return enemyText;
-        }
+        get { return enemyText; }
         set {
             enemyText = value;
             remainingText = value;
@@ -29,17 +27,24 @@ public class Enemy : MonoBehaviour {
 	private void Start () {
         signText = FindObjectOfType<TextMesh>();
         agent = GetComponent<NavMeshAgent>();
-        GameManager.Instance.RegisterEnemy(this);
         signText.text = enemyText;
-        transform.localPosition = startPosition;
+        signText.color = Color.black;
         agent.isStopped = true;
         MoveToDestination(destinationPosition);
 	}
 
 	private void Update()
 	{
-        if (agent.remainingDistance <= agent.stoppingDistance && !(transform.rotation.y >= 0.998f && transform.rotation.y <= 1f)) {
-            transform.Rotate(Vector3.up, 100 * Time.deltaTime);
+        if (agent.remainingDistance <= agent.stoppingDistance) {
+            if (!(transform.rotation.y >= 0.998f && transform.rotation.y <= 1f))
+            {
+                GameManager.Instance.StopEnemies();
+                transform.Rotate(Vector3.up, 100 * Time.deltaTime);
+            }
+            else {
+                canAttack = true;
+                signText.color = Color.red;
+            }
         }
 	}
 
@@ -49,6 +54,9 @@ public class Enemy : MonoBehaviour {
     }
 
     public void ProcessAttackText(string text) {
+        if (!canAttack) {
+            return;
+        }
         foreach (char character in text.ToCharArray()) {
             if (remainingText.Length == 0) {
                 return;
@@ -64,4 +72,13 @@ public class Enemy : MonoBehaviour {
     public bool IsEnemyDead() {
         return remainingText.Length == 0;
     }
+
+    public void StopMoving() {
+        agent.isStopped = true;
+    }
+
+    public void ContinueMoving() {
+        agent.isStopped = false;
+    }
+
 }

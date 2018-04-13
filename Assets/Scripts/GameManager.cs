@@ -13,6 +13,9 @@ public class GameManager : Singleton<GameManager> {
     [SerializeField] private Player player = null;
     [SerializeField] private int totalEnemies = 5;
     [SerializeField] private Enemy[] enemies = null;
+    [SerializeField] private GameObject spawnPoint = null;
+    [SerializeField] private int maxEnemiesOnScreen = 4;
+    [SerializeField] private float spawnDelay = 1.5f;
 
     // Private
     private GameState state = GameState.playing;
@@ -32,21 +35,27 @@ public class GameManager : Singleton<GameManager> {
 
 	// Use this for initialization
 	private void Start () {
-        SpawnEnemy();
+        StartCoroutine(SpawnEnemy());
 	}
 
-    private void SpawnEnemy() {
-        if (enemiesEliminated >= totalEnemies) {
-            return;
+    IEnumerator SpawnEnemy() {
+        if (enemiesEliminated + enemyList.Count < totalEnemies && enemyList.Count < maxEnemiesOnScreen)
+        {
+            string phrase = PhraseManager.Instance.GetRandomPhrase();
+            Enemy newEnemy = Instantiate(GetRandomEnemy());
+            newEnemy.transform.position = spawnPoint.transform.position;
+            RegisterEnemy(newEnemy);
+            newEnemy.EnemyText = phrase;
         }
-        string phrase = PhraseManager.Instance.GetRandomPhrase();
-        Enemy newEnemy = Instantiate(GetRandomEnemy());
-        newEnemy.EnemyText = phrase;
-        SetFocusedEnemy(newEnemy);
+        SetFocusedEnemy();
+        yield return new WaitForSeconds(spawnDelay);
+        StartCoroutine(SpawnEnemy());
     }
 
-    private void SetFocusedEnemy(Enemy enemy) {
-        focusedEnemy = enemy;
+    private void SetFocusedEnemy() {
+        if (enemyList.Count > 0) {
+            focusedEnemy = enemyList[0];
+        }
     }
 
     private Enemy GetRandomEnemy() {
@@ -55,7 +64,7 @@ public class GameManager : Singleton<GameManager> {
     }
 
     // Manage enemies
-    public void RegisterEnemy(Enemy enemy) {
+    private void RegisterEnemy(Enemy enemy) {
         enemyList.Add(enemy);
     }
 
@@ -67,10 +76,24 @@ public class GameManager : Singleton<GameManager> {
     public void EliminateEnemy(Enemy enemy) {
         UnregisterEnemy(enemy);
         enemiesEliminated += 1;
-        SpawnEnemy();
+        StartEnemies();
+        StartCoroutine(SpawnEnemy());
     }
 
     public Enemy GetEnemy() {
         return focusedEnemy;
+    }
+
+    public void StopEnemies() {
+        foreach(Enemy enemy in enemyList) {
+            enemy.StopMoving();
+        }
+    }
+
+    private void StartEnemies() {
+        foreach (Enemy enemy in enemyList)
+        {
+            enemy.ContinueMoving();
+        }
     }
 }
