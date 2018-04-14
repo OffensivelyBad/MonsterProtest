@@ -21,6 +21,7 @@ public class PhraseManager : Singleton<PhraseManager>
         phrases.Add("I like to kill deer");
         phrases.Add("Mister T is a badass");
         phrases.Add("the cat stole my keys");
+        phrases.Add("the quick brown\nfox jumps over\nthe lazy dog");
     }
 
 }

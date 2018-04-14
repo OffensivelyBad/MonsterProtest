@@ -22,6 +22,9 @@ public class Enemy : MonoBehaviour {
             remainingText = value;
         }
     }
+    public NavMeshAgent Agent {
+        get { return agent; }
+    }
 
 	// Use this for initialization
 	private void Start () {
@@ -35,6 +38,12 @@ public class Enemy : MonoBehaviour {
 
 	private void Update()
 	{
+        if (!agent.isActiveAndEnabled) {
+            if (transform.position.y < -10) {
+                Destroy(gameObject);
+            }
+            return;
+        }
         if (agent.remainingDistance <= agent.stoppingDistance) {
             if (!(transform.rotation.y >= 0.998f && transform.rotation.y <= 1f))
             {
@@ -65,6 +74,9 @@ public class Enemy : MonoBehaviour {
             if (remainingCharacters.Length > 0 && character == remainingCharacters[0]) {
                 remainingText = remainingText.Substring(1, remainingText.Length - 1);
                 signText.text = remainingText;
+                GameManager.Instance.PlaySound(AudioManager.Instance.Hit);
+            } else {
+                GameManager.Instance.PlaySound(AudioManager.Instance.Miss);
             }
         }
     }

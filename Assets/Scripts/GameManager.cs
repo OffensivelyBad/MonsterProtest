@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Assertions;
+using UnityEngine.AI;
 
 public enum GameState {
     playing, gameOver
@@ -22,6 +23,7 @@ public class GameManager : Singleton<GameManager> {
     private readonly List<Enemy> enemyList = new List<Enemy>();
     private Enemy focusedEnemy;
     private int enemiesEliminated = 0;
+    private AudioSource audioPlayer;
 
     // Public
     public GameState State {
@@ -35,6 +37,7 @@ public class GameManager : Singleton<GameManager> {
 
 	// Use this for initialization
 	private void Start () {
+        audioPlayer = GetComponent<AudioSource>();
         StartCoroutine(SpawnEnemy());
 	}
 
@@ -70,7 +73,24 @@ public class GameManager : Singleton<GameManager> {
 
     public void UnregisterEnemy(Enemy enemy) {
         enemyList.Remove(enemy);
-        Destroy(enemy.gameObject);
+        enemy.Agent.enabled = false;
+        KillEnemy(enemy);
+    }
+
+    private void KillEnemy(Enemy enemy) {
+        Rigidbody rb = enemy.GetComponent<Rigidbody>();
+        rb.isKinematic = false;
+        rb.useGravity = true;
+        rb.AddForce(GetRandomForceVector(), ForceMode.Impulse);
+        rb.AddTorque(GetRandomForceVector() * 10);
+        PlaySound(AudioManager.Instance.Death);
+    }
+
+    private Vector3 GetRandomForceVector() {
+        float x = Random.Range(-10, 10);
+        float y = Random.Range(5, 15);
+        float z = Random.Range(1, 20);
+        return new Vector3(x, y, z);
     }
 
     public void EliminateEnemy(Enemy enemy) {
@@ -95,5 +115,9 @@ public class GameManager : Singleton<GameManager> {
         {
             enemy.ContinueMoving();
         }
+    }
+
+    public void PlaySound(AudioClip clip) {
+        audioPlayer.PlayOneShot(clip);
     }
 }
