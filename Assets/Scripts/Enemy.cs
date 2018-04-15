@@ -53,6 +53,7 @@ public class Enemy : MonoBehaviour {
             else {
                 canAttack = true;
                 signText.color = Color.red;
+                GameManager.Instance.ResumeTimer();
             }
         }
 	}

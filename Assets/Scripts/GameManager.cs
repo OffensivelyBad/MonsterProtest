@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.AI;
+using UnityEngine.UI;
 
 public enum GameState {
     playing, gameOver
@@ -17,6 +18,7 @@ public class GameManager : Singleton<GameManager> {
     [SerializeField] private GameObject spawnPoint = null;
     [SerializeField] private int maxEnemiesOnScreen = 4;
     [SerializeField] private float spawnDelay = 1.5f;
+    [SerializeField] private Text scoreText = null;
 
     // Private
     private GameState state = GameState.playing;
@@ -24,6 +26,10 @@ public class GameManager : Singleton<GameManager> {
     private Enemy focusedEnemy;
     private int enemiesEliminated = 0;
     private AudioSource audioPlayer;
+    private bool timerRunning = false;
+    private float totalTime = 0.0f;
+    private int numberOfWords = 0;
+    private int wordsPerMinute = 0;
 
     // Public
     public GameState State {
@@ -41,7 +47,14 @@ public class GameManager : Singleton<GameManager> {
         StartCoroutine(SpawnEnemy());
 	}
 
-    IEnumerator SpawnEnemy() {
+	private void Update()
+	{
+        if (timerRunning) {
+            totalTime += Time.deltaTime;
+        }
+	}
+
+	IEnumerator SpawnEnemy() {
         if (enemiesEliminated + enemyList.Count < totalEnemies && enemyList.Count < maxEnemiesOnScreen)
         {
             string phrase = PhraseManager.Instance.GetRandomPhrase();
@@ -49,6 +62,8 @@ public class GameManager : Singleton<GameManager> {
             newEnemy.transform.position = spawnPoint.transform.position;
             RegisterEnemy(newEnemy);
             newEnemy.EnemyText = phrase;
+        } else {
+            state = GameState.gameOver;
         }
         SetFocusedEnemy();
         yield return new WaitForSeconds(spawnDelay);
@@ -94,10 +109,18 @@ public class GameManager : Singleton<GameManager> {
     }
 
     public void EliminateEnemy(Enemy enemy) {
+        timerRunning = false;
+        numberOfWords += GetNumberOfWords(enemy.EnemyText);
+        SetScore(numberOfWords, totalTime);
         UnregisterEnemy(enemy);
         enemiesEliminated += 1;
         StartEnemies();
         StartCoroutine(SpawnEnemy());
+    }
+
+    private int GetNumberOfWords(string text)
+    {
+        return text.Split(' ').Length;
     }
 
     public Enemy GetEnemy() {
@@ -119,5 +142,14 @@ public class GameManager : Singleton<GameManager> {
 
     public void PlaySound(AudioClip clip) {
         audioPlayer.PlayOneShot(clip);
+    }
+
+    public void ResumeTimer() {
+        timerRunning = true;
+    }
+
+    private void SetScore(int words, float time) {
+        int wpm = (int)(((float)words / time) * 60f);
+        scoreText.text = "WPM: " + wpm;
     }
 }
