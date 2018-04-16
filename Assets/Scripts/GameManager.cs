@@ -15,7 +15,6 @@ public class GameManager : Singleton<GameManager> {
     [SerializeField] private Player player = null;
     [SerializeField] private int totalEnemies = 5;
     [SerializeField] private Enemy[] enemies = null;
-    [SerializeField] private GameObject spawnPoint = null;
     [SerializeField] private int maxEnemiesOnScreen = 4;
     [SerializeField] private float spawnDelay = 1.5f;
     [SerializeField] private Text scoreText = null;
@@ -29,7 +28,6 @@ public class GameManager : Singleton<GameManager> {
     private bool timerRunning = false;
     private float totalTime = 0.0f;
     private int numberOfWords = 0;
-    private int wordsPerMinute = 0;
 
     // Public
     public GameState State {
@@ -59,7 +57,6 @@ public class GameManager : Singleton<GameManager> {
         {
             string phrase = PhraseManager.Instance.GetRandomPhrase();
             Enemy newEnemy = Instantiate(GetRandomEnemy());
-            newEnemy.transform.position = spawnPoint.transform.position;
             RegisterEnemy(newEnemy);
             newEnemy.EnemyText = phrase;
         } else {

@@ -5,7 +5,8 @@ using UnityEngine.AI;
 public class Enemy : MonoBehaviour {
 
     // Serialized fields
-    [SerializeField] private Vector3 destinationPosition = Vector3.zero;
+    [SerializeField] private GameObject spawn = null;
+    [SerializeField] private GameObject destination = null;
 
     // Private
     private TextMesh signText;
@@ -28,12 +29,13 @@ public class Enemy : MonoBehaviour {
 
 	// Use this for initialization
 	private void Start () {
+        transform.position = spawn.transform.position;
         signText = FindObjectOfType<TextMesh>();
         agent = GetComponent<NavMeshAgent>();
         signText.text = enemyText;
         signText.color = Color.black;
         agent.isStopped = true;
-        MoveToDestination(destinationPosition);
+        MoveToDestination(destination.transform.position);
 	}
 
 	private void Update()
@@ -45,10 +47,10 @@ public class Enemy : MonoBehaviour {
             return;
         }
         if (agent.remainingDistance <= agent.stoppingDistance) {
+            GameManager.Instance.StopEnemies();
             if (!(transform.rotation.y >= 0.998f && transform.rotation.y <= 1f))
-            {
-                GameManager.Instance.StopEnemies();
-                transform.Rotate(Vector3.up, 100 * Time.deltaTime);
+            {                
+                transform.Rotate(Vector3.up, 200 * Time.deltaTime);
             }
             else {
                 canAttack = true;
